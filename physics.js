@@ -3,7 +3,6 @@ class Stage1 extends Phaser.Scene
 
 
 {
-    movingPlatform;
     cursors;
     platform1;
     platforms;
@@ -26,16 +25,29 @@ class Stage1 extends Phaser.Scene
     create ()
     {
         this.add.image(960,540, 'mars');
-        this.platforms = this.physics.add.staticGroup();
-        this.platforms.create(960, 1300, 'platform').setScale(1.2).refreshBody();
-        this.platform1 = this.physics.add.image(500, 700, 'platform').setScale(.3);
+        this.platform1 = this.physics.add.image(800, 700, 'platform').setScale(.3).refreshBody();
         this.platform1.setImmovable(true);
         this.platform1.body.allowGravity = false;
         this.car = this.physics.add.sprite(100, 450, 'car').setScale(.1);
         this.car.setBounce(0.2);
         this.car.setCollideWorldBounds(true);
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('car', { start: 3, end: 5 }),
+            frameRate: 4,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('car', { start: 0, end: 2 }),
+            frameRate: 4,
+            repeat: -1
+        });
+        this.cursors = this.input.keyboard.createCursorKeys();
 
+        this.physics.add.collider(this.car, this.platform1);
 
+        this.physics.add.overlap(this.car, null, this);
     }
     update(){
 

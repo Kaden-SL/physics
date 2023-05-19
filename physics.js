@@ -1,7 +1,5 @@
+var cleartime=0;
 class Stage1 extends Phaser.Scene
-
-
-
 {
     constructor() {
         super({ key: 'stage1' });    
@@ -32,7 +30,7 @@ class Stage1 extends Phaser.Scene
             540,
             'mars',
         );
-        this.timeText = this.add.text(16,16, "Time Survived: ");
+        this.timeText = this.add.text(16,16, "Time Taken: ");
 
        
 
@@ -79,8 +77,9 @@ class Stage1 extends Phaser.Scene
         this.physics.collide(this.car, this.paltform1);
         this.physics.overlap(this.car, this.platform1, (car, platform1) =>
         {
-            console.log('Yuh')
-            this.scene.start('stage2');
+            console.log(gameRuntime);
+            cleartime=Math.round(gameRuntime);
+            this.scene.start('result1');
 
         });
             
@@ -161,21 +160,25 @@ class Stage3 extends Phaser.Scene
 }
 class Result1 extends Phaser.Scene
 {
+    constructor() {
+        super({ key: 'result1' });    
+    }
     preload(){
         this.load.path = './assets/';
-        this.load.image('mainroom', 'mainroom.png');
-        this.load.image('hallway', 'hallway.png');
-        this.load.image('corrupt', 'corrupt.png');
-        this.load.image('corrupthall', 'corrupthall.png');
-        this.load.audio('humm',['backgroundhmm.mp3']);
-        this.load.audio('door',['doorsound.mp3']);
-        this.load.audio('ding',['ding.mp3']);
-        this.load.audio('anger',['angryhumm.wav']);
+        this.load.image('score', 'score.png');
 
     }
     create ()
     {
-
+        this.background = this.add.image(
+            960,
+            540,
+            'score',
+        );
+        this.timeText = this.add.text(250,500, "Clear Time: " + Math.round(cleartime) + " seconds",{
+            font: "bold 40px Arial",
+        });
+        
     }
     update(){
         
@@ -240,6 +243,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Stage1,Stage2],
-    title: "The Room",
+    scene: [Result1],
+    title: "Physics",
 });

@@ -113,6 +113,8 @@ class Stage1 extends Phaser.Scene
 }
 class Stage2 extends Phaser.Scene
 {
+    jumps=0;
+    cleartime=0;
     cursors;
     constructor() {
         super({ key: 'stage2' });    
@@ -251,21 +253,29 @@ class Result1 extends Phaser.Scene
 }
 class Result2 extends Phaser.Scene
 {
+    constructor() {
+        super({ key: 'result2' });    
+    }
     preload(){
         this.load.path = './assets/';
-        this.load.image('mainroom', 'mainroom.png');
-        this.load.image('hallway', 'hallway.png');
-        this.load.image('corrupt', 'corrupt.png');
-        this.load.image('corrupthall', 'corrupthall.png');
-        this.load.audio('humm',['backgroundhmm.mp3']);
-        this.load.audio('door',['doorsound.mp3']);
-        this.load.audio('ding',['ding.mp3']);
-        this.load.audio('anger',['angryhumm.wav']);
+        this.load.image('score', 'score.png');
 
     }
     create ()
     {
-
+        console.log(jumps)
+        this.background = this.add.image(
+            960,
+            540,
+            'score',
+        );
+        this.timeText = this.add.text(250,500, "Clear Time: " + Math.round(cleartime) + " seconds",{
+            font: "bold 40px Arial",
+        });
+        this.timeText = this.add.text(1100,500, "Amount of Jumps: " + jumps ,{
+            font: "bold 40px Arial",
+        });
+        
     }
     update(){
         

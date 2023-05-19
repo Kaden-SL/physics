@@ -1,4 +1,5 @@
 var cleartime=0;
+var jumps=0;
 class Stage1 extends Phaser.Scene
 {
     constructor() {
@@ -106,6 +107,7 @@ class Stage1 extends Phaser.Scene
 
         if (up.isDown && this.car.body.blocked.down)
         {
+            jumps+=1;
             this.car.setVelocityY(-330);
         }
 
@@ -170,6 +172,7 @@ class Result1 extends Phaser.Scene
     }
     create ()
     {
+        console.log(jumps)
         this.background = this.add.image(
             960,
             540,
@@ -243,6 +246,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Result1],
+    scene: [Stage1,Result1],
     title: "Physics",
 });

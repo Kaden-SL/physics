@@ -181,6 +181,9 @@ class Result1 extends Phaser.Scene
         this.timeText = this.add.text(250,500, "Clear Time: " + Math.round(cleartime) + " seconds",{
             font: "bold 40px Arial",
         });
+        this.timeText = this.add.text(1100,500, "Amount of Jumps: " + jumps ,{
+            font: "bold 40px Arial",
+        });
         
     }
     update(){

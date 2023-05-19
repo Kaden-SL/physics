@@ -3,6 +3,9 @@ class Stage1 extends Phaser.Scene
 
 
 {
+    constructor() {
+        super({ key: 'stage1' });    
+    }
     cursors;
     platform1;
     platforms;
@@ -24,37 +27,63 @@ class Stage1 extends Phaser.Scene
     }
     create ()
     {
-        this.add.image(960,540, 'mars');
-        this.platform1 = this.physics.add.image(800, 700, 'platform').setScale(.3).refreshBody();
+        this.background = this.add.image(
+            960,
+            540,
+            'mars',
+        );
+        this.timeText = this.add.text(16,16, "Time Survived: ");
+
+       
+
+        // this.add.image(960,540, 'mars');
+
+        this.platform1 = this.physics.add.image(1000, 1100, 'platform').setScale(.3).refreshBody();
         this.platform1.setImmovable(true);
         this.platform1.body.allowGravity = false;
+
         this.car = this.physics.add.sprite(100, 450, 'car').setScale(.1);
         this.car.setBounce(0.2);
         this.car.setCollideWorldBounds(true);
+
         this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('car', { start: 3, end: 5 }),
             frameRate: 10,
             repeat: -1
         });
+        
         this.anims.create({
             key: 'right',
             frames: this.anims.generateFrameNumbers('car', { start: 0, end: 2 }),
             frameRate: 10,
             repeat: -1
         });
+
         this.anims.create({
             key: 'stay',
             frames: [ { key: 'car', frame: 4 } ],
             frameRate: 20
         });
+
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        this.physics.add.collider(this.car, this.platform1);
+    
 
-        this.physics.add.overlap(this.car, null, this);
+        
     }
-    update(){
+    update(time){
+        var gameRuntime = time * 0.001;
+        this.timeText.setText("Time Survived: " + Math.round(gameRuntime) + " seconds");
+
+        this.physics.collide(this.car, this.paltform1);
+        this.physics.overlap(this.car, this.platform1, (car, platform1) =>
+        {
+            console.log('Yuh')
+            this.scene.start('stage2');
+
+        });
+            
         const { left, right, up } = this.cursors;
 
         if (left.isDown)
@@ -76,7 +105,7 @@ class Stage1 extends Phaser.Scene
 
         }
 
-        if (up.isDown)
+        if (up.isDown && this.car.body.blocked.down)
         {
             this.car.setVelocityY(-330);
         }
@@ -85,6 +114,9 @@ class Stage1 extends Phaser.Scene
 }
 class Stage2 extends Phaser.Scene
 {
+    constructor() {
+        super({ key: 'stage2' });    
+    }
     preload(){
         this.load.path = './assets/';
         this.load.image('mainroom', 'mainroom.png');
@@ -208,6 +240,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Stage1],
+    scene: [Stage1,Stage2],
     title: "The Room",
 });

@@ -30,19 +30,26 @@ class Stage1 extends Phaser.Scene
             540,
             'mars',
         );
+        this.directions = this.add.text(550,16,"Make it to the final platform using the arrow keys",{
+            font: "bold 35px Arial",
+        })
         this.timeText = this.add.text(16,16, "Time Taken: ");
 
        
 
         // this.add.image(960,540, 'mars');
 
-        this.platform1 = this.physics.add.image(1000, 1100, 'platform').setScale(.3).refreshBody();
+        this.platform1 = this.physics.add.image(1000, 900, 'platform').setScale(.3).refreshBody();
         this.platform1.setImmovable(true);
         this.platform1.body.allowGravity = false;
     
-        this.platform2 = this.physics.add.image(500, 900, 'platform').setScale(.3).refreshBody();
+        this.platform2 = this.physics.add.image(500, 1000, 'platform').setScale(.3).refreshBody();
         this.platform2.setImmovable(true);
         this.platform2.body.allowGravity = false;
+
+        this.platform3 = this.physics.add.image(1500, 800, 'platform').setScale(.3).refreshBody();
+        this.platform3.setImmovable(true);
+        this.platform3.body.allowGravity = false;
 
         this.car = this.physics.add.sprite(100, 450, 'car').setScale(.1);
         this.car.setBounce(0.2);
@@ -69,6 +76,7 @@ class Stage1 extends Phaser.Scene
         });
         this.physics.add.collider(this.car, this.platform2);
         this.physics.add.collider(this.car, this.platform1);
+        // this.physics.add.collider(this.car, this.platform3);
         this.cursors = this.input.keyboard.createCursorKeys();
 
     
@@ -77,28 +85,28 @@ class Stage1 extends Phaser.Scene
     }
     update(time){
         var gameRuntime = time * 0.001;
-        this.timeText.setText("Time Survived: " + Math.round(gameRuntime) + " seconds");
+        this.timeText.setText("Time Taken: " + Math.round(gameRuntime) + " seconds");
 
         // this.physics.collide(this.car, this.paltform1);
         // this.physics.collider(this.car, this.paltform2);
-        // this.physics.overlap(this.car, this.platform2, (car, platform1) =>
-        // {
-        //     cleartime=Math.round(gameRuntime);
-        //     this.scene.start('result1');
+        this.physics.overlap(this.car, this.platform3, (car, platform1) =>
+        {
+            cleartime=Math.round(gameRuntime);
+            this.scene.start('result1');
 
-        // });
+        });
             
         const { left, right, up } = this.cursors;
 
         if (left.isDown)
         {
-            this.car.setVelocityX(-160);
+            this.car.setVelocityX(-230);
 
             this.car.anims.play('left', true);
         }
         else if (right.isDown)
         {
-            this.car.setVelocityX(160);
+            this.car.setVelocityX(230);
 
             this.car.anims.play('right', true);
         }
@@ -112,20 +120,20 @@ class Stage1 extends Phaser.Scene
         if (up.isDown && this.car.body.blocked.down)
         {
             jumps+=1;
-            this.car.setVelocityY(-330);
+            this.car.setVelocityY(-400);
         }
 
     }
 }
 class Stage2 extends Phaser.Scene
 {
-    jumps=0;
-    cleartime=0;
+    
     cursors;
     constructor() {
         super({ key: 'stage2' });    
     }
     preload(){
+        console.log(cleartime,jumps);
         this.load.path = './assets/';
         this.load.image('mars', 'marsground.png');
         this.load.image('platform', 'platform.png');
@@ -134,6 +142,7 @@ class Stage2 extends Phaser.Scene
     }
     create ()
     {
+
         this.background = this.add.image(
             960,
             540,
@@ -145,6 +154,24 @@ class Stage2 extends Phaser.Scene
         this.car = this.physics.add.sprite(100, 450, 'car').setScale(.1);
         this.car.setBounce(0.2);
         this.car.setCollideWorldBounds(true);
+
+        const platforms = this.physics.add.group({
+            defaultKey: 'platform'
+        });
+
+        platforms.create(400, 500).setScale(.3).refreshBody();
+        platforms.create(400, 400).setScale(.3).refreshBody();
+        platforms.create(450, 400).setScale(.3).refreshBody();
+        platforms.create(500, 300).setScale(.3).refreshBody();
+        platforms.create(550, 200).setScale(.3).refreshBody();
+        platforms.create(600, 100).setScale(.3).refreshBody();
+        for (const platform of platforms.getChildren())
+        {
+            platform.body.immovable = true;
+            platform.body.moves = false;
+        }
+        this.physics.add.collider(this.car, platforms);
+       
 
         this.anims.create({
             key: 'left',
@@ -165,7 +192,9 @@ class Stage2 extends Phaser.Scene
             frames: [ { key: 'car', frame: 4 } ],
             frameRate: 20
         });
+
     }
+        
     update(time){
             var gameRuntime = time * 0.001;
             this.timeText.setText("Time Survived: " + Math.round(gameRuntime) + " seconds");
@@ -310,6 +339,7 @@ class Result1 extends Phaser.Scene
     preload(){
         this.load.path = './assets/';
         this.load.image('score', 'score.png');
+        this.load.image('hover', 'hover.png');
 
     }
     create ()
@@ -320,12 +350,26 @@ class Result1 extends Phaser.Scene
             540,
             'score',
         );
+        this.add.image(950,950,'hover').setScale(1.5)
         this.timeText = this.add.text(250,500, "Clear Time: " + Math.round(cleartime) + " seconds",{
             font: "bold 40px Arial",
         });
         this.timeText = this.add.text(1100,500, "Amount of Jumps: " + jumps ,{
             font: "bold 40px Arial",
         });
+        
+        this.time.addEvent({
+            delay:2000,
+        callback: () => {
+            this.timeText = this.add.text(750,1000, "click anywhere to continue",);
+            this.input.on('pointerdown', () => this.scene.start('stage2'));
+            jumps=0;
+            cleartime=0;
+
+            }
+            
+        })
+
         
     }
     update(){
@@ -399,6 +443,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Stage1],
+    scene: [Stage2],
     title: "Physics",
 });

@@ -138,6 +138,7 @@ class Stage2 extends Phaser.Scene
         this.load.image('mars', 'marsground.png');
         this.load.image('platform', 'platform.png');
         this.load.spritesheet('car', 'car.png', { frameWidth: 1920, frameHeight: 1080 });
+        this.load.image('side', 'sideplat.png');
 
     }
     create ()
@@ -148,6 +149,9 @@ class Stage2 extends Phaser.Scene
             540,
             'mars',
         );
+        this.directions = this.add.text(550,16,"Make it to end using the arrow keys, now you can hover!",{
+            font: "bold 35px Arial",
+        })
         this.timeText = this.add.text(16,16, "Time Taken: ");
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -158,20 +162,38 @@ class Stage2 extends Phaser.Scene
         const platforms = this.physics.add.group({
             defaultKey: 'platform'
         });
-
-        platforms.create(400, 500).setScale(.3).refreshBody();
-        platforms.create(400, 400).setScale(.3).refreshBody();
-        platforms.create(450, 400).setScale(.3).refreshBody();
-        platforms.create(500, 300).setScale(.3).refreshBody();
-        platforms.create(550, 200).setScale(.3).refreshBody();
-        platforms.create(600, 100).setScale(.3).refreshBody();
+        platforms.create(200, 800).setScale(.3).refreshBody();
+        platforms.create(530, 360).setScale(.3).refreshBody();
+        platforms.create(530, 100).setScale(.3).refreshBody();
+        platforms.create(950, 360).setScale(.3).refreshBody();
+        platforms.create(950, 100).setScale(.3).refreshBody();
+        platforms.create(1370, 100).setScale(.3).refreshBody();
+        this.platformend = this.physics.add.image(1370, 1050, 'platform').setScale(.3).refreshBody();
+        this.platformend.setImmovable(true);
+        this.platformend.body.allowGravity = false;
         for (const platform of platforms.getChildren())
         {
             platform.body.immovable = true;
             platform.body.moves = false;
         }
         this.physics.add.collider(this.car, platforms);
-       
+
+
+        const sideplatforms = this.physics.add.group({
+            defaultKey: 'side'
+        });
+        sideplatforms.create(365, 600).setScale(.3).refreshBody();
+        sideplatforms.create(1115, 615).setScale(.3).refreshBody();
+        sideplatforms.create(1115, 1000).setScale(.3).refreshBody();
+        sideplatforms.create(1535, 350).setScale(.3).refreshBody();
+        sideplatforms.create(1535, 760).setScale(.3).refreshBody();
+        sideplatforms.create(1535, 1000).setScale(.3).refreshBody();
+        for (const platform of sideplatforms.getChildren())
+        {
+            platform.body.immovable = true;
+            platform.body.moves = false;
+        }
+        this.physics.add.collider(this.car, sideplatforms);
 
         this.anims.create({
             key: 'left',
@@ -197,8 +219,13 @@ class Stage2 extends Phaser.Scene
         
     update(time){
             var gameRuntime = time * 0.001;
-            this.timeText.setText("Time Survived: " + Math.round(gameRuntime) + " seconds");
+            this.timeText.setText("Time Taken: " + Math.round(gameRuntime) + " seconds");
+            this.physics.overlap(this.car, this.platformend, (car, platform1) =>
+        {
+            cleartime=Math.round(gameRuntime);
+            this.scene.start('result2');
 
+        });
             const { left, right, up, down } = this.cursors;
 
         this.car.setAcceleration(0, 0);
@@ -443,6 +470,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Stage2],
+    scene: [Stage2,Result2],
     title: "Physics",
 });

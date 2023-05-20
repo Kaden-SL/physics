@@ -183,6 +183,7 @@ class Stage2 extends Phaser.Scene
         }
         else if (down.isDown)
         {
+            
             this.car.setAccelerationY(600);
         }
 
@@ -199,27 +200,101 @@ class Stage2 extends Phaser.Scene
     }
     }
 
-class Stage3 extends Phaser.Scene
-{
-    preload(){
-        this.load.path = './assets/';
-        this.load.image('mainroom', 'mainroom.png');
-        this.load.image('hallway', 'hallway.png');
-        this.load.image('corrupt', 'corrupt.png');
-        this.load.image('corrupthall', 'corrupthall.png');
-        this.load.audio('humm',['backgroundhmm.mp3']);
-        this.load.audio('door',['doorsound.mp3']);
-        this.load.audio('ding',['ding.mp3']);
-        this.load.audio('anger',['angryhumm.wav']);
-
-    }
-    create ()
+    class Stage3 extends Phaser.Scene
     {
-
-    }
-    update(){
-
-    }
+        jumps=0;
+        cleartime=0;
+        cursors;
+        constructor() {
+            super({ key: 'stage3' });    
+        }
+        preload(){
+            this.load.path = './assets/';
+            this.load.image('mars', 'marsground.png');
+            this.load.image('platform', 'platform.png');
+            this.load.spritesheet('car', 'car.png', { frameWidth: 1920, frameHeight: 1080 });
+    
+        }
+        create ()
+        {
+            this.background = this.add.image(
+                960,
+                540,
+                'mars',
+            );
+            this.timeText = this.add.text(16,16, "Time Taken: ");
+            this.cursors = this.input.keyboard.createCursorKeys();
+    
+            this.car = this.physics.add.sprite(100, 450, 'car').setScale(.1);
+            this.car.setBounce(0.2);
+            this.car.setCollideWorldBounds(true);
+    
+            this.anims.create({
+                key: 'left',
+                frames: this.anims.generateFrameNumbers('car', { start: 3, end: 5 }),
+                frameRate: 10,
+                repeat: -1
+            });
+            
+            this.anims.create({
+                key: 'right',
+                frames: this.anims.generateFrameNumbers('car', { start: 0, end: 2 }),
+                frameRate: 10,
+                repeat: -1
+            });
+    
+            this.anims.create({
+                key: 'stay',
+                frames: [ { key: 'car', frame: 4 } ],
+                frameRate: 20
+            });
+            
+        }
+        update(time){
+                var gameRuntime = time * 0.001;
+                this.timeText.setText("Time Survived: " + Math.round(gameRuntime) + " seconds");
+    
+                const { left, right, up, down } = this.cursors;
+    
+            this.car.setAcceleration(0, 0);
+            var dashKey = this.input.keyboard.addKey('E');
+            if(dashKey.isDown){
+                this.car.body.x -= 50
+            }
+            if (left.isDown)
+            {
+                
+                this.car.setAccelerationX(-60);
+            }
+            else if (right.isDown)
+            {
+                this.car.setAccelerationX(60);
+            }
+    
+            if (up.isDown)
+            {
+                this.car.setAccelerationY(-600);
+            }
+            else if (down.isDown)
+            {
+                
+                this.car.setAccelerationY(600);
+            }
+    
+            const { x } = this.car.body.velocity;
+            if (x < 0)
+            {
+                this.car.play('left', true);
+            }
+            else if (x > 0)
+            {
+                this.car.play('right', true);
+            }
+        
+        }
+        }
+{
+   
 }
 class Result1 extends Phaser.Scene
 {
@@ -318,6 +393,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Stage2],
+    scene: [Stage3],
     title: "Physics",
 });

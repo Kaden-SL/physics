@@ -273,11 +273,14 @@ class Stage3 extends Phaser.Scene
             super({ key: 'stage3' });    
         }
         preload(){
-            this.load.path = './assets/';
-            this.load.image('mars', 'marsground.png');
-            this.load.image('platform', 'platform.png');
-            this.load.spritesheet('car', 'car.png', { frameWidth: 1920, frameHeight: 1080 });
-    
+            console.log(cleartime,jumps);
+        this.load.path = './assets/';
+        this.load.image('mars', 'marsground.png');
+        this.load.image('platform', 'platform.png');
+        this.load.spritesheet('car', 'car.png', { frameWidth: 1920, frameHeight: 1080 });
+        this.load.image('side', 'sideplat.png');
+            
+        
         }
         create ()
         {
@@ -286,6 +289,10 @@ class Stage3 extends Phaser.Scene
                 540,
                 'mars',
             );
+            this.directions = this.add.text(300,16,"Make it to end using the arrow keys, now you can dash right with with 'e'!, and left with 'q'",{
+                font: "bold 35px Arial",
+            })
+            
             this.timeText = this.add.text(16,16, "Time Taken: ");
             this.cursors = this.input.keyboard.createCursorKeys();
     
@@ -293,6 +300,37 @@ class Stage3 extends Phaser.Scene
             this.car.setBounce(0.2);
             this.car.setCollideWorldBounds(true);
     
+            const platforms = this.physics.add.group({
+                defaultKey: 'platform'
+            });
+            platforms.create(200, 1000).setScale(.3).refreshBody();
+            platforms.create(1150, 800).setScale(.3).refreshBody();
+            platforms.create(1900, 650).setScale(.3).refreshBody();
+            platforms.create(1000, 500).setScale(.3).refreshBody();
+            
+            this.platformend = this.physics.add.image(190, 300, 'platform').setScale(.3).refreshBody();
+            this.platformend.setImmovable(true);
+            this.platformend.body.allowGravity = false;
+            for (const platform of platforms.getChildren())
+            {
+                platform.body.immovable = true;
+                platform.body.moves = false;
+            }
+            this.physics.add.collider(this.car, platforms);
+    
+    
+            const sideplatforms = this.physics.add.group({
+                defaultKey: 'side'
+            });
+            // sideplatforms.create(1115, 615).setScale(.3).refreshBody();
+            
+            for (const platform of sideplatforms.getChildren())
+            {
+                platform.body.immovable = true;
+                platform.body.moves = false;
+            }
+            this.physics.add.collider(this.car, sideplatforms);
+
             this.anims.create({
                 key: 'left',
                 frames: this.anims.generateFrameNumbers('car', { start: 3, end: 5 }),
@@ -312,7 +350,7 @@ class Stage3 extends Phaser.Scene
                 frames: [ { key: 'car', frame: 4 } ],
                 frameRate: 20
             });
-            
+         
         }
             
         update(time){
@@ -321,16 +359,31 @@ class Stage3 extends Phaser.Scene
     
                 const { left, right, up, down } = this.cursors;
     
-
+                this.physics.overlap(this.car, this.platformend, (car, platform1) =>
+                {
+                    cleartime=Math.round(gameRuntime);
+                    this.scene.start('result3');
+        
+                });
             this.dashKey = this.input.keyboard.addKey('E');
             if(this.dashKey){
             if (Phaser.Input.Keyboard.JustDown(this.dashKey))
             {
-                console.log('y')
-                this.car.setVelocityX(-230);
+                jumps+=1;
+                this.car.x += 100;
         
             }
         }
+        this.dashKey2 = this.input.keyboard.addKey('Q');
+            if(this.dashKey2){
+            if (Phaser.Input.Keyboard.JustDown(this.dashKey2))
+            {
+                jumps+=1;
+                this.car.x -= 100;
+        
+            }
+        }
+        
             if (left.isDown)
         {
             this.car.setVelocityX(-230);
@@ -449,21 +502,42 @@ class Result2 extends Phaser.Scene
 }
 class Result3 extends Phaser.Scene
 {
+    constructor() {
+        super({ key: 'result3' });    
+    }
     preload(){
         this.load.path = './assets/';
-        this.load.image('mainroom', 'mainroom.png');
-        this.load.image('hallway', 'hallway.png');
-        this.load.image('corrupt', 'corrupt.png');
-        this.load.image('corrupthall', 'corrupthall.png');
-        this.load.audio('humm',['backgroundhmm.mp3']);
-        this.load.audio('door',['doorsound.mp3']);
-        this.load.audio('ding',['ding.mp3']);
-        this.load.audio('anger',['angryhumm.wav']);
+        this.load.image('score', 'score.png');
+        this.load.image('grats', 'cadet.png');
 
     }
     create ()
     {
+        console.log(jumps)
+        this.background = this.add.image(
+            960,
+            540,
+            'score',
+        );
+        this.add.image(950,950,'grats').setScale(1.5)
+        this.timeText = this.add.text(250,500, "Clear Time: " + Math.round(cleartime) + " seconds",{
+            font: "bold 40px Arial",
+        });
+        this.timeText = this.add.text(1100,500, "Dashes: " + jumps ,{
+            font: "bold 40px Arial",
+        });
+        this.time.addEvent({
+            delay:2000,
+        callback: () => {
+            this.timeText = this.add.text(750,1000, "click anywhere to restart",);
+            this.input.on('pointerdown', () => this.scene.start('stage1'));
+            jumps=0;
+            cleartime=0;
 
+            }
+            
+        })
+        
     }
     update(){
         
@@ -484,6 +558,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Stage3],
+    scene: [Stage1,Stage2,Stage3,Result1,Result2,Result3],
     title: "Physics",
 });

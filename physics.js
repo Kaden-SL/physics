@@ -1,5 +1,6 @@
 var cleartime=0;
 var jumps=0;
+
 class Stage1 extends Phaser.Scene
 {
     constructor() {
@@ -241,6 +242,7 @@ class Stage2 extends Phaser.Scene
 
         if (up.isDown)
         {
+            jumps+=1;
             this.car.setAccelerationY(-600);
         }
         else if (down.isDown)
@@ -262,7 +264,7 @@ class Stage2 extends Phaser.Scene
     }
     }
 
-    class Stage3 extends Phaser.Scene
+class Stage3 extends Phaser.Scene
     {
         jumps=0;
         cleartime=0;
@@ -312,52 +314,52 @@ class Stage2 extends Phaser.Scene
             });
             
         }
+            
         update(time){
                 var gameRuntime = time * 0.001;
                 this.timeText.setText("Time Survived: " + Math.round(gameRuntime) + " seconds");
     
                 const { left, right, up, down } = this.cursors;
     
-            this.car.setAcceleration(0, 0);
-            var dashKey = this.input.keyboard.addKey('E');
-            if(dashKey.isDown){
-                this.car.body.x -= 50
-            }
-            if (left.isDown)
+
+            this.dashKey = this.input.keyboard.addKey('E');
+            if(this.dashKey){
+            if (Phaser.Input.Keyboard.JustDown(this.dashKey))
             {
-                
-                this.car.setAccelerationX(-60);
-            }
-            else if (right.isDown)
-            {
-                this.car.setAccelerationX(60);
-            }
-    
-            if (up.isDown)
-            {
-                this.car.setAccelerationY(-600);
-            }
-            else if (down.isDown)
-            {
-                
-                this.car.setAccelerationY(600);
-            }
-    
-            const { x } = this.car.body.velocity;
-            if (x < 0)
-            {
-                this.car.play('left', true);
-            }
-            else if (x > 0)
-            {
-                this.car.play('right', true);
-            }
+                console.log('y')
+                this.car.setVelocityX(-230);
         
+            }
+        }
+            if (left.isDown)
+        {
+            this.car.setVelocityX(-230);
+
+            this.car.anims.play('left', true);
+        }
+        else if (right.isDown)
+        {
+            this.car.setVelocityX(230);
+
+            this.car.anims.play('right', true);
+        }
+        else
+        {
+            this.car.setVelocityX(0);
+
+
+        }
+
+        if (up.isDown && this.car.body.blocked.down)
+        {
+            jumps+=1;
+            this.car.setVelocityY(-400);
+        }
+
+            
         }
         }
-{
-   
-}
+
 class Result1 extends Phaser.Scene
 {
     constructor() {
@@ -371,7 +373,6 @@ class Result1 extends Phaser.Scene
     }
     create ()
     {
-        console.log(jumps)
         this.background = this.add.image(
             960,
             540,
@@ -411,6 +412,7 @@ class Result2 extends Phaser.Scene
     preload(){
         this.load.path = './assets/';
         this.load.image('score', 'score.png');
+        this.load.image('boost', 'boost.png');
 
     }
     create ()
@@ -421,12 +423,24 @@ class Result2 extends Phaser.Scene
             540,
             'score',
         );
+        this.add.image(950,950,'boost').setScale(1.5)
         this.timeText = this.add.text(250,500, "Clear Time: " + Math.round(cleartime) + " seconds",{
             font: "bold 40px Arial",
         });
-        this.timeText = this.add.text(1100,500, "Amount of Jumps: " + jumps ,{
+        this.timeText = this.add.text(1100,500, "Hover Time: " + jumps + " ms",{
             font: "bold 40px Arial",
         });
+        this.time.addEvent({
+            delay:2000,
+        callback: () => {
+            this.timeText = this.add.text(750,1000, "click anywhere to continue",);
+            this.input.on('pointerdown', () => this.scene.start('stage3'));
+            jumps=0;
+            cleartime=0;
+
+            }
+            
+        })
         
     }
     update(){
@@ -470,6 +484,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Stage2,Result2],
+    scene: [Stage3],
     title: "Physics",
 });

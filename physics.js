@@ -7,6 +7,7 @@ class Stage1 extends Phaser.Scene
     }
     cursors;
     platform1;
+    platform2;
     car;
 
     preload(){
@@ -38,6 +39,10 @@ class Stage1 extends Phaser.Scene
         this.platform1 = this.physics.add.image(1000, 1100, 'platform').setScale(.3).refreshBody();
         this.platform1.setImmovable(true);
         this.platform1.body.allowGravity = false;
+    
+        this.platform2 = this.physics.add.image(500, 900, 'platform').setScale(.3).refreshBody();
+        this.platform2.setImmovable(true);
+        this.platform2.body.allowGravity = false;
 
         this.car = this.physics.add.sprite(100, 450, 'car').setScale(.1);
         this.car.setBounce(0.2);
@@ -62,7 +67,8 @@ class Stage1 extends Phaser.Scene
             frames: [ { key: 'car', frame: 4 } ],
             frameRate: 20
         });
-
+        this.physics.add.collider(this.car, this.platform2);
+        this.physics.add.collider(this.car, this.platform1);
         this.cursors = this.input.keyboard.createCursorKeys();
 
     
@@ -73,14 +79,14 @@ class Stage1 extends Phaser.Scene
         var gameRuntime = time * 0.001;
         this.timeText.setText("Time Survived: " + Math.round(gameRuntime) + " seconds");
 
-        this.physics.collide(this.car, this.paltform1);
-        this.physics.overlap(this.car, this.platform1, (car, platform1) =>
-        {
-            console.log(gameRuntime);
-            cleartime=Math.round(gameRuntime);
-            this.scene.start('result1');
+        // this.physics.collide(this.car, this.paltform1);
+        // this.physics.collider(this.car, this.paltform2);
+        // this.physics.overlap(this.car, this.platform2, (car, platform1) =>
+        // {
+        //     cleartime=Math.round(gameRuntime);
+        //     this.scene.start('result1');
 
-        });
+        // });
             
         const { left, right, up } = this.cursors;
 
@@ -393,6 +399,6 @@ const game = new Phaser.Game({
         }
     },
     // scene: [Room3,Hallway2],
-    scene: [Stage3],
+    scene: [Stage1],
     title: "Physics",
 });
